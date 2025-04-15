@@ -1,23 +1,23 @@
-using System.Reflection;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddCarter(new DependencyContextAssemblyCatalog([typeof(Program).Assembly]));
-builder.Services.AddMediatR(config =>
+var assembly = typeof(Program).Assembly;
+builder.Services.AddMediatR(x =>
 {
-    config.RegisterServicesFromAssemblies(typeof(Program).Assembly);
+    x.RegisterServicesFromAssembly(assembly);
+    x.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    x.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
-builder.Services.AddMarten(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("Database")!);
-    //options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.All;
-    //options.DatabaseSchemaName = "catalog";
-}).UseLightweightSessions();
+builder.Services.AddValidatorsFromAssembly(assembly);
+builder.Services.AddCarter(new DependencyContextAssemblyCatalog([assembly]));
+builder.Services.AddMarten(x => x.Connection(builder.Configuration.GetConnectionString("Database")!)).UseLightweightSessions();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapCarter();
+app.UseExceptionHandler(x => { });
 
 app.Run();
