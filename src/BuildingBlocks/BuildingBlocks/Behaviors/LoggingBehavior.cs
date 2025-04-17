@@ -18,11 +18,11 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
         var response = await next(cancellationToken);
 
         timer.Stop();
-        var timeTaken = timer.Elapsed;
-        if (timeTaken.Seconds > 3) //if the request is greater than 3 seconds, then will log the performance warning
-            logger.LogWarning("[PERFORMANCE] Request: {Request} | Response: {Response} | RequestData: {RequestData} | TimeTaken: {TimeTaken}", typeof(TRequest).Name, typeof(TResponse).Name, request, timeTaken);
+        var duration = timer.Elapsed;
+        if (duration.Seconds > 3) //if the request is greater than 3 seconds, then will log the performance warning
+            logger.LogWarning("[PERFORMANCE] Request: {Request} | Response: {Response} | RequestData: {RequestData} | Duration(ms): {Duration}", typeof(TRequest).Name, typeof(TResponse).Name, request, duration);
 
-        logger.LogInformation("[END] Request: {Request} | Response: {Response} | TimeTaken: {TimeTaken}", typeof(TRequest).Name, typeof(TResponse).Name, timeTaken);
+        logger.LogInformation("[END] Request: {Request} | Response: {Response} | Duration(ms): {Duration}", typeof(TRequest).Name, typeof(TResponse).Name, duration);
 
         return response;
     }
