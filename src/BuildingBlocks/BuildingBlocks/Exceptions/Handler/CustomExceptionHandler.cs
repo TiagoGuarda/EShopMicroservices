@@ -6,19 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Exceptions.Handler;
 
-public class CustomExceptionHandler : IExceptionHandler
+public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IExceptionHandler
 {
-    private readonly ILogger<CustomExceptionHandler> _logger;
-    public CustomExceptionHandler(ILogger<CustomExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
-
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.LogError("Error Message: {exceptionMessage}, {time}", exception.Message, DateTime.UtcNow);
+        logger.LogError("Error Message: {exceptionMessage}, {time}", exception.Message, DateTime.UtcNow);
 
-        (string Detail, string Title, int StatusCode) details = exception switch
+        (string Detail, string Title, int StatusCode) = exception switch
         {
             InternalServerException => 
             (
@@ -54,9 +48,9 @@ public class CustomExceptionHandler : IExceptionHandler
 
         var problemDetails = new ProblemDetails
         {
-            Title = details.Title,
-            Detail = details.Detail,
-            Status = details.StatusCode,
+            Title = Title,
+            Detail = Detail,
+            Status = StatusCode,
             Instance = context.Request.Path,
         };
 
