@@ -3,6 +3,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 var assembly = typeof(Program).Assembly;
 
+// Add Application Services
+builder.Services.AddCarter(new DependencyContextAssemblyCatalog([assembly]));
+
 builder.Services.AddMediatR(x =>
 {
     x.RegisterServicesFromAssembly(assembly);
@@ -10,8 +13,7 @@ builder.Services.AddMediatR(x =>
     x.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 
-builder.Services.AddCarter(new DependencyContextAssemblyCatalog([assembly]));
-
+// Add Data Services
 builder.Services.AddMarten(x => 
 {
     x.Connection(builder.Configuration.GetConnectionString("Database")!);
@@ -27,6 +29,19 @@ builder.Services.AddStackExchangeRedisCache(x =>
     //x.InstanceName = "Basket";
 });
 
+// Add gRPC client Services
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(x =>
+{
+    x.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+}).ConfigurePrimaryHttpMessageHandler(() =>
+{
+    return new HttpClientHandler()
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator //Bypass SSL validation for development
+    };
+});
+
+// Add Cross-Cutting Services
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 builder.Services.AddHealthChecks()
