@@ -3,18 +3,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var assembly = typeof(Program).Assembly;
 
-builder.Services.AddMediatR(x =>
+builder.Services.AddMediatR(config =>
 {
-    x.RegisterServicesFromAssembly(assembly);
-    x.AddOpenBehavior(typeof(ValidationBehavior<,>));
-    x.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    config.RegisterServicesFromAssembly(assembly);
+    config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 
 builder.Services.AddValidatorsFromAssembly(assembly);
 
 builder.Services.AddCarter(new DependencyContextAssemblyCatalog([assembly]));
 
-builder.Services.AddMarten(x => x.Connection(builder.Configuration.GetConnectionString("Database")!)).UseLightweightSessions();
+builder.Services.AddMarten(config => config.Connection(builder.Configuration.GetConnectionString("Database")!)).UseLightweightSessions();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.InitializeMartenWith<CatalogInitialData>();

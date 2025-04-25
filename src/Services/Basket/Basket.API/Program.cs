@@ -6,33 +6,33 @@ var assembly = typeof(Program).Assembly;
 // Add Application Services
 builder.Services.AddCarter(new DependencyContextAssemblyCatalog([assembly]));
 
-builder.Services.AddMediatR(x =>
+builder.Services.AddMediatR(config =>
 {
-    x.RegisterServicesFromAssembly(assembly);
-    x.AddOpenBehavior(typeof(ValidationBehavior<,>));
-    x.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    config.RegisterServicesFromAssembly(assembly);
+    config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 
 // Add Data Services
-builder.Services.AddMarten(x => 
+builder.Services.AddMarten(config => 
 {
-    x.Connection(builder.Configuration.GetConnectionString("Database")!);
-    x.Schema.For<ShoppingCart>().Identity(x => x.UserName); // use UserName as the identity for ShoppingCart
+    config.Connection(builder.Configuration.GetConnectionString("Database")!);
+    config.Schema.For<ShoppingCart>().Identity(x => x.UserName); // use UserName as the identity for ShoppingCart
 }).UseLightweightSessions();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 
-builder.Services.AddStackExchangeRedisCache(x =>
+builder.Services.AddStackExchangeRedisCache(config =>
 {
-    x.Configuration = builder.Configuration.GetConnectionString("Redis");
+    config.Configuration = builder.Configuration.GetConnectionString("Redis");
     //x.InstanceName = "Basket";
 });
 
 // Add gRPC client Services
-builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(x =>
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(config =>
 {
-    x.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+    config.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
 }).ConfigurePrimaryHttpMessageHandler(() =>
 {
     return new HttpClientHandler()

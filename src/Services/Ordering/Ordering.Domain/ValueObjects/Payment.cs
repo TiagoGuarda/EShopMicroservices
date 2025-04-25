@@ -2,11 +2,11 @@
 
 public record Payment
 {
-    private const int MaxCvvLenght = 3;
+    private const int MaxCvvLength = 3;
     public string? CardName { get; } = default!;
     public string CardNumber { get; } = default!;
     public string Expiration { get; } = default!;
-    public string CVV { get; } = default!;
+    public string Cvv { get; } = default!;
     public int PaymentMethod { get; } = default!;
 
     protected Payment() { }
@@ -16,7 +16,7 @@ public record Payment
         CardName = cardName;
         CardNumber = cardNumber;
         Expiration = expiration;
-        CVV = cvv;
+        Cvv = cvv;
         PaymentMethod = paymentMethod;
     }
 
@@ -25,7 +25,7 @@ public record Payment
         ArgumentException.ThrowIfNullOrWhiteSpace(cardName);
         ArgumentException.ThrowIfNullOrWhiteSpace(cardNumber);
         ArgumentException.ThrowIfNullOrWhiteSpace(cvv);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(cvv.Length, MaxCvvLenght);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(cvv.Length, MaxCvvLength);
 
         return new(cardName, cardNumber, expiration, cvv, paymentMethod);
     }
