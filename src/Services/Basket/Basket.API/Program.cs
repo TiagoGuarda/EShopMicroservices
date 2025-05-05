@@ -1,3 +1,5 @@
+using BuildingBlocks.Messaging.MassTransit;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -40,6 +42,9 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
         ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator //Bypass SSL validation for development
     };
 });
+
+// Add Async Communication Services
+builder.Services.AddMessageBroker(builder.Configuration);
 
 // Add Cross-Cutting Services
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
