@@ -1,4 +1,6 @@
-﻿namespace Catalog.API.Products.DeleteProduct;
+﻿using MediatR;
+
+namespace Catalog.API.Products.DeleteProduct;
 public record DeleteProductRequest(
     Guid Id
 );
@@ -10,7 +12,7 @@ public class DeleteProductEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/products/{id}", async (ISender sender, Guid id) =>
+        app.MapDelete("/products/{id}", async (Guid id, ISender sender) =>
         {
             var result = await sender.Send(new DeleteProductCommand(id));
             var response = result.Adapt<DeleteProductResponse>();
